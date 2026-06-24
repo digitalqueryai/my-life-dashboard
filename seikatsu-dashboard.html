@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生活 Seikatsu — Sourav's Daily Rhythm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Shippori+Mincho:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --washi:#efe9dc;
+    --washi-2:#e7dfce;
+    --paper:#faf6ec;
+    --paper-soft:#f4eee0;
+    --ink:#2c2823;
+    --ink-soft:#5f574b;
+    --ink-faint:#8c8273;
+    --ai:#34597a;          /* indigo (ai-iro) */
+    --ai-soft:#5b7e9c;
+    --shu:#b8472b;         /* vermillion seal (shu) */
+    --matcha:#7c8a52;      /* matcha green */
+    --gold:#b08d4f;
+    --line:#d8cdb8;
+    --shadow:0 1px 2px rgba(44,40,35,.06),0 8px 28px rgba(44,40,35,.07);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Zen Maru Gothic","Segoe UI",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #f3ecdc 0%, transparent 60%),
+      radial-gradient(1000px 500px at -10% 110%, #efe6d2 0%, transparent 55%),
+      var(--washi);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    padding:0 0 80px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .mincho{font-family:"Shippori Mincho",Georgia,serif}
+  .jp{font-family:"Shippori Mincho",serif;letter-spacing:.04em}
+
+  /* ---------- header ---------- */
+  header{padding:46px 0 26px;text-align:center;position:relative}
+  .seal{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:62px;height:62px;border-radius:14px;
+    background:var(--shu);color:#fff;font-family:"Shippori Mincho",serif;
+    font-size:30px;font-weight:700;box-shadow:var(--shadow);
+    transform:rotate(-2deg);margin-bottom:14px;
+  }
+  .greeting{font-size:clamp(26px,4.4vw,40px);font-weight:600;letter-spacing:.01em}
+  .greeting .jp{color:var(--shu)}
+  .subline{color:var(--ink-soft);margin-top:6px;font-size:15px}
+  .season{
+    display:inline-block;margin-top:14px;padding:6px 16px;border-radius:999px;
+    background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);
+    font-size:13.5px;box-shadow:var(--shadow)
+  }
+  .season b{color:var(--matcha)}
+
+  /* ---------- clocks ---------- */
+  .clocks{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 8px;
+  }
+  .clock{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 14px;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden
+  }
+  .clock .place{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.12em}
+  .clock .time{font-family:"Shippori Mincho",serif;font-size:27px;font-weight:600;margin-top:3px}
+  .clock .meta{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .clock .tag{
+    margin-top:8px;display:inline-block;font-size:11px;padding:2px 9px;border-radius:999px;
+    background:var(--washi-2);color:var(--ink-soft)
+  }
+  .clock .tag.open{background:rgba(124,138,82,.18);color:#566032}
+  .clock .tag.closed{background:rgba(184,71,43,.12);color:var(--shu)}
+
+  /* ---------- sections ---------- */
+  section{margin-top:42px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+  .sec-head .num{font-family:"Shippori Mincho",serif;color:var(--shu);font-size:18px}
+  .sec-head h2{font-size:21px;font-weight:600;letter-spacing:.01em}
+  .sec-head .jp{color:var(--ink-faint);font-size:15px;font-weight:400}
+
+  /* principle card */
+  .principle{
+    background:linear-gradient(135deg,#fbf8f0,#f3ead8);
+    border:1px solid var(--line);border-radius:var(--radius);padding:26px 28px;
+    box-shadow:var(--shadow);position:relative;overflow:hidden
+  }
+  .principle::before{
+    content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;
+    border:2px solid rgba(184,71,43,.12);border-radius:50%
+  }
+  .principle .word{font-family:"Shippori Mincho",serif;font-size:30px;font-weight:700;color:var(--ai)}
+  .principle .kana{color:var(--shu);font-size:17px;margin-left:8px;font-family:"Shippori Mincho",serif}
+  .principle .mean{font-size:14px;color:var(--ink-faint);margin:2px 0 12px;letter-spacing:.04em}
+  .principle p{font-size:15.5px;color:var(--ink-soft);max-width:760px}
+  .principle .today-do{
+    margin-top:14px;padding:12px 16px;background:var(--paper);border-left:3px solid var(--matcha);
+    border-radius:8px;font-size:14.5px
+  }
+  .principle .today-do b{color:var(--matcha)}
+
+  /* timeline */
+  .timeline{display:flex;flex-direction:column;gap:10px}
+  .block{
+    display:grid;grid-template-columns:84px 14px 1fr;gap:14px;align-items:stretch;
+  }
+  .block .t{font-family:"Shippori Mincho",serif;font-size:14px;color:var(--ink-soft);padding-top:14px;text-align:right;white-space:nowrap}
+  .rail{position:relative;display:flex;justify-content:center}
+  .rail::before{content:"";position:absolute;top:0;bottom:-10px;width:2px;background:var(--line)}
+  .dot{width:13px;height:13px;border-radius:50%;background:var(--paper);border:2px solid var(--ai);margin-top:16px;z-index:1}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;
+    padding:13px 16px;box-shadow:var(--shadow)
+  }
+  .card .ttl{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .card .desc{font-size:13.5px;color:var(--ink-soft);margin-top:3px}
+  .pill{font-size:11px;padding:2px 9px;border-radius:999px;font-weight:500;white-space:nowrap}
+  .p-calm{background:rgba(52,89,122,.12);color:var(--ai)}
+  .p-family{background:rgba(184,71,43,.12);color:var(--shu)}
+  .p-work{background:var(--washi-2);color:var(--ink-soft)}
+  .p-biz{background:rgba(176,141,79,.16);color:var(--gold)}
+  .p-practice{background:rgba(124,138,82,.16);color:#566032}
+  .p-daughter{background:rgba(202,108,132,.16);color:#a8536c}
+  .p-cook{background:rgba(200,140,70,.18);color:#9a6b2f}
+  .block.daughter .card{background:linear-gradient(135deg,#fdf4f3,#faeef0);border-color:#ecd2d6}
+  .block.daughter .dot{border-color:#ca6c84}
+  .block.now .card{border-color:var(--shu);box-shadow:0 0 0 2px rgba(184,71,43,.18),var(--shadow)}
+  .block.now .dot{background:var(--shu);border-color:var(--shu)}
+  .nowtag{font-size:10.5px;color:#fff;background:var(--shu);padding:1px 7px;border-radius:999px}
+
+  /* practices */
+  .practices{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .habit{
+    display:flex;gap:13px;align-items:flex-start;background:var(--paper);
+    border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;
+    box-shadow:var(--shadow);transition:.18s;user-select:none
+  }
+  .habit:hover{transform:translateY(-1px);border-color:var(--ai-soft)}
+  .habit .box{
+    width:24px;height:24px;border-radius:7px;border:2px solid var(--ai-soft);flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.18s;font-size:15px;color:#fff
+  }
+  .habit.done .box{background:var(--matcha);border-color:var(--matcha)}
+  .habit.done .name{text-decoration:line-through;color:var(--ink-faint)}
+  .habit .name{font-weight:600;font-size:14.5px}
+  .habit .jp{font-size:12px;color:var(--ink-faint);font-weight:400}
+  .habit .why{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .progress-wrap{margin-top:16px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow)}
+  .progress-wrap .lab{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);margin-bottom:8px}
+  .bar{height:9px;background:var(--washi-2);border-radius:999px;overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--matcha),var(--ai));transition:width .4s}
+
+  /* business windows */
+  .biz-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .biz{
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px 17px;
+    box-shadow:var(--shadow);border-left:4px solid var(--gold)
+  }
+  .biz h3{font-size:15.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .biz .when{font-size:11.5px;color:var(--ink-faint);font-weight:500;white-space:nowrap}
+  .biz p{font-size:13px;color:var(--ink-soft);margin-top:5px}
+  .biz.s-india{border-left-color:#c1502e}
+  .biz.s-us{border-left-color:#34597a}
+  .biz.s-ebay{border-left-color:#7c8a52}
+  .biz.s-ticker{border-left-color:#b08d4f}
+  .biz.s-tata{border-left-color:#5f574b}
+  .biz .live{font-size:10.5px;padding:1px 8px;border-radius:999px}
+  .biz .live.on{background:rgba(124,138,82,.18);color:#566032}
+  .biz .live.off{background:var(--washi-2);color:var(--ink-faint)}
+
+  /* daughter's day */
+  .her-intro{font-size:13.5px;color:var(--ink-soft);margin:-6px 0 14px;max-width:780px}
+  .her-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+  .drow{
+    display:grid;grid-template-columns:54px 1fr;gap:11px;align-items:center;
+    background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:9px 13px;box-shadow:var(--shadow)
+  }
+  .drow .dt{font-family:"Shippori Mincho",serif;font-size:13px;color:var(--ink-soft);text-align:right}
+  .drow .dmain{font-size:13.5px;font-weight:600}
+  .drow .dsub{font-size:12px;color:var(--ink-faint);font-weight:400}
+  .drow.share{background:linear-gradient(135deg,#fdf4f3,#faecef);border-color:#ecd2d6}
+  .drow.share .dmain::after{content:" · 一緒 together";font-size:11px;color:#a8536c;font-weight:600}
+  .drow.dnow{box-shadow:0 0 0 2px rgba(202,108,132,.35),var(--shadow)}
+  .her-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--ink-soft)}
+  .her-legend span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:13px;height:13px;border-radius:4px;display:inline-block}
+
+  /* reflection */
+  .reflect{background:linear-gradient(135deg,#fbf8f0,#f1e8d6);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow)}
+  .reflect label{display:block;font-size:13.5px;color:var(--ink-soft);margin:12px 0 6px}
+  .reflect label:first-of-type{margin-top:4px}
+  .reflect textarea,.reflect input{
+    width:100%;background:var(--paper);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;font-family:inherit;font-size:14px;color:var(--ink);resize:vertical
+  }
+  .reflect textarea{min-height:54px}
+  .reflect .save-note{font-size:12px;color:var(--ink-faint);margin-top:10px}
+
+  /* nature note */
+  .nature{display:flex;gap:14px;align-items:flex-start;background:rgba(124,138,82,.1);border:1px solid rgba(124,138,82,.25);border-radius:14px;padding:15px 18px;margin-top:14px}
+  .nature .ic{font-size:24px}
+  .nature p{font-size:13.5px;color:var(--ink-soft)}
+  .nature b{color:#566032}
+
+  /* tools launcher */
+  .tools{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+  .tool-btn{
+    display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:13px 15px;
+    box-shadow:var(--shadow);transition:.18s
+  }
+  .tool-btn:hover{transform:translateY(-2px);border-color:var(--ai-soft)}
+  .tool-btn .ti{font-size:22px}
+  .tool-btn b{display:block;font-size:14px}
+  .tool-btn span{font-size:11.5px;color:var(--ink-faint)}
+  /* toggle */
+  .toggle{display:inline-flex;background:var(--washi-2);border:1px solid var(--line);border-radius:999px;padding:3px;margin-left:auto}
+  .toggle button{border:none;background:transparent;font-family:inherit;font-size:13px;color:var(--ink-soft);padding:5px 16px;border-radius:999px;cursor:pointer;transition:.18s}
+  .toggle button.on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow);font-weight:600}
+  .sec-head.row{align-items:center}
+  /* weekend focus cards */
+  .wk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .wk{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow);border-top:3px solid var(--matcha)}
+  .wk h3{font-size:14.5px;display:flex;align-items:center;gap:8px}
+  .wk .wt{font-size:11.5px;color:var(--ai);font-weight:600;margin-top:3px}
+  .wk p{font-size:12.5px;color:var(--ink-soft);margin-top:5px}
+  .wk.k-garden{border-top-color:#7c8a52}
+  .wk.k-move{border-top-color:#b8472b}
+  .wk.k-out{border-top-color:#34597a}
+  .wk.k-india{border-top-color:#c1502e}
+  .wk.k-astro{border-top-color:#7a5ba0}
+  .wk.k-money{border-top-color:#b08d4f}
+  /* monthly trip */
+  .trip{display:flex;gap:18px;align-items:flex-start;background:linear-gradient(135deg,#fbf8f0,#eef2e6);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow)}
+  .trip .tm{font-family:"Shippori Mincho",serif;text-align:center;flex:0 0 auto}
+  .trip .tm .mo{font-size:13px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em}
+  .trip .tm .pl{font-size:20px;font-weight:700;color:var(--matcha);margin-top:2px;max-width:120px}
+  .trip .td{flex:1}
+  .trip .td h3{font-size:16px}
+  .trip .td p{font-size:13.5px;color:var(--ink-soft);margin-top:5px}
+  .trip .td .note{font-size:12px;color:var(--ink-faint);margin-top:8px}
+
+  /* wealth */
+  .fin-summary{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+  .fin-summary .total{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+  .fin-summary .total b{font-family:"Shippori Mincho",serif;font-size:26px}
+  .fin-summary .total span{font-size:12.5px;color:var(--ink-faint)}
+  .alloc-bar{height:20px;border-radius:999px;overflow:hidden;display:flex;margin:14px 0 10px;background:var(--washi-2)}
+  .alloc-bar > i{height:100%;display:block;transition:width .4s}
+  .alloc-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-soft)}
+  .alloc-legend span{display:inline-flex;align-items:center;gap:6px}
+  .fin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .fcard{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow);border-left:4px solid var(--ink-faint)}
+  .fcard .fh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .fcard .fn{font-weight:600;font-size:14.5px}
+  .fcard .btag{font-size:10px;padding:2px 9px;border-radius:999px;font-weight:600;white-space:nowrap;color:#fff}
+  .fcard .role{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+  .fcard .ginp{display:flex;align-items:center;gap:7px;margin:9px 0}
+  .fcard .ginp label{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+  .fcard .ginp input{flex:1;min-width:0;background:var(--washi);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-family:inherit;font-size:13.5px;color:var(--ink)}
+  .fcard .pct{font-size:11.5px;color:var(--ai);font-weight:600;white-space:nowrap;min-width:30px;text-align:right}
+  .fcard .guide{font-size:12.5px;color:var(--ink-soft)}
+  .fcard .cad{display:inline-block;margin-top:8px;font-size:11px;background:var(--washi-2);color:var(--ink-soft);padding:2px 9px;border-radius:999px}
+  .fin-disclaimer{font-size:12px;color:var(--ink-faint);background:rgba(184,71,43,.07);border:1px solid rgba(184,71,43,.18);border-radius:12px;padding:11px 14px;margin-top:14px}
+
+  /* sync bar */
+  .syncbar{margin-top:14px;font-size:12.5px}
+  .syncbar #sync-out,.syncbar #sync-in{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:9px 13px;box-shadow:var(--shadow)}
+  .syncbar .lk{color:var(--ink-faint);margin-right:2px}
+  .syncbar input{background:var(--washi);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;color:var(--ink);min-width:0;flex:1}
+  .syncbar button{background:var(--ai);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  .syncbar button.ghost{background:transparent;color:var(--ai);border:1px solid var(--ai-soft)}
+  .syncbar .sync-msg{color:var(--shu);flex-basis:100%;font-size:12px}
+  .syncbar .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--matcha);display:inline-block}
+  .syncbar b{color:var(--ink)}
+
+  /* tabs */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px;position:sticky;top:0;z-index:30;
+    background:linear-gradient(var(--washi) 70%,rgba(239,233,220,0));padding:12px 0 14px}
+  .tabs button{font-family:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--paper);
+    color:var(--ink-soft);padding:8px 15px;border-radius:999px;cursor:pointer;box-shadow:var(--shadow);transition:.18s}
+  .tabs button:hover{border-color:var(--ai-soft);transform:translateY(-1px)}
+  .tabs button.on{background:var(--ai);color:#fff;border-color:var(--ai)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .tab-panel > section:first-child{margin-top:18px}
+
+  /* work list */
+  .todo-add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .todo-add input{flex:1;min-width:200px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;color:var(--ink)}
+  .todo-add select{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+  .todo-add button{background:var(--ai);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:.18s}
+  .todo-add button:hover{background:var(--ai-soft)}
+  .todo-stats{font-size:12.5px;color:var(--ink-faint);margin-bottom:12px}
+  .todo-sub{font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.12em;margin:18px 0 8px}
+  .todo-item{display:flex;align-items:flex-start;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:8px;transition:.15s}
+  .todo-item:hover{border-color:var(--ai-soft)}
+  .todo-item .tbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--ai-soft);flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;cursor:pointer;margin-top:1px}
+  .todo-item.done .tbox{background:var(--matcha);border-color:var(--matcha)}
+  .todo-item.done .ttext{text-decoration:line-through;color:var(--ink-faint)}
+  .todo-item .tmid{flex:1;min-width:0}
+  .todo-item .ttext{font-size:14px;font-weight:500;word-break:break-word}
+  .todo-item .tmeta{margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .todo-item .tcat{font-size:10.5px;color:#fff;padding:2px 9px;border-radius:999px}
+  .todo-item .tpri{font-size:11px;font-weight:600}
+  .tpri.p2{color:var(--shu)} .tpri.p1{color:var(--gold)} .tpri.p0{color:var(--ink-faint)}
+  .todo-item .tdel{background:none;border:none;color:var(--ink-faint);font-size:20px;cursor:pointer;line-height:1;padding:0 4px}
+  .todo-item .tdel:hover{color:var(--shu)}
+  .todo-empty{font-size:13.5px;color:var(--ink-faint);text-align:center;padding:28px;background:var(--paper);border:1px dashed var(--line);border-radius:12px}
+
+  footer{text-align:center;margin-top:54px;color:var(--ink-faint)}
+  footer .haiku{font-family:"Shippori Mincho",serif;font-size:16px;color:var(--ink-soft);line-height:1.9}
+  footer .sig{font-size:12px;margin-top:14px}
+
+  @media(max-width:720px){
+    .clocks{grid-template-columns:1fr;gap:10px}
+    .practices,.biz-grid{grid-template-columns:1fr}
+    .block{grid-template-columns:64px 12px 1fr;gap:10px}
+    .block .t{font-size:12.5px}
+  }
+
+  /* ============================================================
+     PREMIUM "QUIET LUXURY" THEME · terracotta lead (override layer)
+     ============================================================ */
+  :root{
+    --washi:#efe7da;
+    --washi-2:#e6dccb;
+    --paper:#fffefb;
+    --paper-soft:#f8f2e9;
+    --ink:#221d17;
+    --ink-soft:#6b6256;
+    --ink-faint:#9b9182;
+    --ai:#c0532f;            /* lead terracotta — primary UI */
+    --ai-soft:#d2885f;
+    --shu:#b8472b;           /* deep terracotta accent */
+    --matcha:#7c8a52;
+    --gold:#b8924e;
+    --line:#e8dccb;
+    --radius:20px;
+    --shadow:0 1px 2px rgba(40,28,20,.05), 0 8px 22px -6px rgba(40,28,20,.10), 0 30px 60px -28px rgba(40,28,20,.18);
+  }
+  body{
+    font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 520px at 82% -8%, #f7eee1 0%, transparent 58%),
+      radial-gradient(900px 480px at -8% 108%, #efe1ce 0%, transparent 55%),
+      linear-gradient(180deg,#f1e9dc 0%, #ece1d0 100%);
+    background-attachment:fixed;
+  }
+  .mincho,.jp{font-family:"Shippori Mincho",Georgia,serif}
+
+  /* header */
+  .seal{
+    background:linear-gradient(145deg,#cc6038,#a63c1d);
+    border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 8px 20px -5px rgba(166,60,29,.5), inset 0 1px 0 rgba(255,255,255,.28);
+  }
+  .greeting{font-family:"Shippori Mincho",serif;font-weight:600;letter-spacing:.004em}
+  .subline{letter-spacing:.02em}
+  .season{background:rgba(255,254,251,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+
+  /* unified premium card surfaces */
+  .clock,.card,.biz,.wk,.fcard,.habit,.fin-summary,.tool-btn,.todo-item,.progress-wrap,.drow{
+    background:linear-gradient(180deg,#fffefb 0%, #fdf7ef 100%);
+    border-color:var(--line);
+  }
+  .clock,.biz,.wk,.fcard,.tool-btn{transition:transform .22s cubic-bezier(.2,.7,.2,1), box-shadow .22s ease, border-color .2s ease}
+  .clock:hover,.biz:hover,.wk:hover,.fcard:hover,.tool-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 4px 10px -4px rgba(40,28,20,.12), 0 24px 48px -18px rgba(40,28,20,.24);
+    border-color:rgba(192,83,47,.35);
+  }
+  .clock .time{letter-spacing:.015em}
+
+  /* premium feature panels */
+  .principle,.reflect,.trip{
+    background:linear-gradient(135deg,#fffdf9 0%, #f6ecdd 100%);
+    border-color:var(--line);
+  }
+  .principle::before{border-color:rgba(192,83,47,.14)}
+  .principle .word{font-weight:700;letter-spacing:.01em}
+
+  /* section headings */
+  .sec-head h2{font-weight:700;letter-spacing:.004em}
+  .sec-head .num{font-weight:700}
+
+  /* premium tab nav */
+  .tabs{background:linear-gradient(var(--washi) 72%, rgba(241,233,220,0))}
+  .tabs button{
+    background:rgba(255,254,251,.82);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border-color:var(--line);font-weight:600;letter-spacing:.01em;
+  }
+  .tabs button:hover{border-color:rgba(192,83,47,.4)}
+  .tabs button.on{
+    background:linear-gradient(145deg,#cc6038,#a63c1d);
+    border-color:transparent;color:#fff;
+    box-shadow:0 7px 18px -6px rgba(166,60,29,.6);
+  }
+
+  /* primary buttons */
+  .todo-add button,.syncbar button:not(.ghost){
+    background:linear-gradient(145deg,#cc6038,#a63c1d);
+    box-shadow:0 7px 16px -6px rgba(166,60,29,.55);
+    letter-spacing:.01em;
+  }
+  .todo-add button:hover,.syncbar button:not(.ghost):hover{filter:brightness(1.06)}
+  .syncbar #sync-out,.syncbar #sync-in{background:linear-gradient(180deg,#fffefb,#fdf7ef)}
+
+  /* keep "calm" category pill distinct now that --ai is terracotta */
+  .p-calm{background:rgba(58,85,102,.13);color:#3a5566}
+  .clock .tag.open{background:rgba(124,138,82,.2);color:#566032}
+  .block.now .card{box-shadow:0 0 0 2px rgba(184,71,43,.22), var(--shadow)}
+
+  /* progress + allocation polish */
+  .bar > i{background:linear-gradient(90deg,#cc6038,#7c8a52)}
+  .alloc-bar{box-shadow:inset 0 1px 3px rgba(40,28,20,.1)}
+  .progress-wrap .bar{box-shadow:inset 0 1px 2px rgba(40,28,20,.08)}
+
+  /* habit checkbox + done state stays green for satisfaction */
+  .habit:hover{border-color:rgba(192,83,47,.35)}
+
+  footer .haiku{letter-spacing:.02em}
+
+  /* knowledge tab */
+  .kwatch{display:inline-block;margin-top:10px;font-size:11.5px;font-weight:600;color:var(--ai);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;transition:.18s}
+  .kwatch:hover{background:var(--ai);color:#fff;border-color:var(--ai)}
+  .kbooks{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+  .kbook{display:block;text-decoration:none;color:inherit;background:linear-gradient(180deg,#fffefb,#fdf7ef);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:13px;padding:13px 16px;box-shadow:var(--shadow);transition:.2s}
+  .kbook:hover{transform:translateY(-2px);border-left-color:var(--ai);box-shadow:0 4px 10px -4px rgba(40,28,20,.12),0 22px 44px -18px rgba(40,28,20,.22)}
+  .kbook .bt{font-weight:600;font-size:14px}
+  .kbook .ba{font-size:12px;color:var(--ink-faint);margin:1px 0 5px}
+  .kbook .bd{font-size:12.5px;color:var(--ink-soft)}
+  .kbook .bplay{font-size:11px;color:var(--ai);font-weight:600;margin-top:6px;display:inline-block}
+  .kvids{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+  @media(max-width:720px){.wk-grid,.kbooks,.kvids,.tools{grid-template-columns:1fr}}
+
+  /* Mt Fuji spring backdrop */
+  #fuji{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+  #fuji svg{width:100%;height:100%;display:block}
+  .petal{position:fixed;top:-24px;width:13px;height:13px;
+    background:linear-gradient(135deg,#f8d2dc,#ec9fb5);
+    border-radius:150% 0 150% 0;opacity:0;z-index:-1;pointer-events:none;
+    animation:petalfall linear infinite}
+  @keyframes petalfall{
+    0%{transform:translateY(-30px) translateX(0) rotate(0deg);opacity:0}
+    8%{opacity:.7}
+    100%{transform:translateY(106vh) translateX(70px) rotate(540deg);opacity:0}}
+  .petal:nth-child(1){left:5%;animation-duration:16s;animation-delay:0s}
+  .petal:nth-child(2){left:17%;animation-duration:21s;animation-delay:4s;width:10px;height:10px}
+  .petal:nth-child(3){left:29%;animation-duration:18s;animation-delay:9s}
+  .petal:nth-child(4){left:43%;animation-duration:24s;animation-delay:2s;width:9px;height:9px}
+  .petal:nth-child(5){left:58%;animation-duration:19s;animation-delay:11s}
+  .petal:nth-child(6){left:69%;animation-duration:23s;animation-delay:6s;width:11px;height:11px}
+  .petal:nth-child(7){left:80%;animation-duration:17s;animation-delay:14s}
+  .petal:nth-child(8){left:90%;animation-duration:22s;animation-delay:3s;width:10px;height:10px}
+  .petal:nth-child(9){left:48%;animation-duration:26s;animation-delay:17s;width:8px;height:8px}
+  @media(prefers-reduced-motion:reduce){.petal{display:none}}
+</style>
+</head>
+<body>
+
+<!-- Mt Fuji · spring · cherry blossom backdrop -->
+<div id="fuji" aria-hidden="true">
+  <svg viewBox="0 0 1440 1024" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f8e3e8"/>
+        <stop offset="0.28" stop-color="#efe4e6"/>
+        <stop offset="0.50" stop-color="#efe8dc"/>
+        <stop offset="0.66" stop-color="#efe8dc" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="fujiG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c4cfdc"/>
+        <stop offset="1" stop-color="#a9b6c6"/>
+      </linearGradient>
+      <linearGradient id="hillG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#cdd2c2"/>
+        <stop offset="1" stop-color="#bcc6ab"/>
+      </linearGradient>
+      <g id="bloss">
+        <g fill="#f8d2dc">
+          <ellipse cx="0" cy="-12" rx="7.5" ry="11"/>
+          <ellipse cx="0" cy="-12" rx="7.5" ry="11" transform="rotate(72)"/>
+          <ellipse cx="0" cy="-12" rx="7.5" ry="11" transform="rotate(144)"/>
+          <ellipse cx="0" cy="-12" rx="7.5" ry="11" transform="rotate(216)"/>
+          <ellipse cx="0" cy="-12" rx="7.5" ry="11" transform="rotate(288)"/>
+        </g>
+        <circle r="4.5" fill="#e79ab0"/>
+      </g>
+    </defs>
+
+    <!-- sky -->
+    <rect width="1440" height="1024" fill="url(#sky)"/>
+    <!-- soft spring sun -->
+    <circle cx="1060" cy="300" r="165" fill="#f6dcc6" opacity="0.45"/>
+
+    <!-- distant Mt Fuji -->
+    <g opacity="0.92">
+      <path d="M300,615 C490,335 625,205 720,205 C815,205 950,335 1140,615 Z" fill="url(#fujiG)"/>
+      <!-- snow cap -->
+      <path d="M648,330 Q683,255 720,212 Q757,255 792,330 L778,318 L766,330 L753,317 L740,331 L727,317 L720,326 L713,317 L700,331 L687,317 L674,330 L661,318 Z" fill="#ffffff" opacity="0.95"/>
+      <!-- mist bands -->
+      <ellipse cx="720" cy="500" rx="250" ry="16" fill="#ffffff" opacity="0.30"/>
+      <ellipse cx="700" cy="555" rx="320" ry="18" fill="#ffffff" opacity="0.22"/>
+    </g>
+
+    <!-- soft foreground hills -->
+    <path d="M0,640 C260,585 520,640 760,610 C1010,580 1240,635 1440,605 L1440,1024 L0,1024 Z" fill="url(#hillG)" opacity="0.28"/>
+
+    <!-- cherry blossom branch (top-left) -->
+    <g opacity="0.95">
+      <path d="M-20,60 C120,30 230,120 340,92 C300,150 250,150 250,150" fill="none" stroke="#5e4d44" stroke-width="7" stroke-linecap="round"/>
+      <path d="M120,55 C150,30 175,15 210,18" fill="none" stroke="#5e4d44" stroke-width="4" stroke-linecap="round"/>
+      <path d="M300,98 C330,80 360,95 392,120" fill="none" stroke="#5e4d44" stroke-width="5" stroke-linecap="round"/>
+      <use href="#bloss" transform="translate(60,52) scale(0.95)"/>
+      <use href="#bloss" transform="translate(118,40) scale(0.8)"/>
+      <use href="#bloss" transform="translate(205,20) scale(1.0)"/>
+      <use href="#bloss" transform="translate(250,80) scale(0.85)"/>
+      <use href="#bloss" transform="translate(330,92) scale(1.1)"/>
+      <use href="#bloss" transform="translate(392,122) scale(0.95)"/>
+      <circle cx="170" cy="70" r="4" fill="#f3c0cd"/>
+      <circle cx="280" cy="40" r="4" fill="#f3c0cd"/>
+    </g>
+
+    <!-- a few blossoms top-right -->
+    <g opacity="0.9">
+      <path d="M1460,70 C1360,55 1300,120 1230,110" fill="none" stroke="#5e4d44" stroke-width="6" stroke-linecap="round"/>
+      <use href="#bloss" transform="translate(1300,96) scale(1.0)"/>
+      <use href="#bloss" transform="translate(1360,70) scale(0.85)"/>
+      <use href="#bloss" transform="translate(1240,112) scale(0.9)"/>
+    </g>
+  </svg>
+</div>
+<div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="seal jp">生</div>
+    <div class="greeting"><span id="greet">Good morning</span>, Sourav <span class="jp">·活</span></div>
+    <div class="subline" id="dateline">—</div>
+    <div class="season" id="season">—</div>
+  </header>
+
+  <!-- clocks -->
+  <div class="clocks" id="clocks">
+    <div class="clock">
+      <div class="place">Port Talbot · 家</div>
+      <div class="time" id="t-uk">--:--</div>
+      <div class="meta">Home · your day</div>
+      <div class="tag" id="tag-uk">—</div>
+    </div>
+    <div class="clock">
+      <div class="place">India · व्यापार</div>
+      <div class="time" id="t-in">--:--</div>
+      <div class="meta">IST · business hours</div>
+      <div class="tag" id="tag-in">—</div>
+    </div>
+    <div class="clock">
+      <div class="place">US Market · 株</div>
+      <div class="time" id="t-us">--:--</div>
+      <div class="meta">New York · NYSE</div>
+      <div class="tag" id="tag-us">—</div>
+    </div>
+  </div>
+
+  <!-- tools launcher -->
+  <div class="tools">
+    <a class="tool-btn" href="file:///C:/Users/SOURA/Documents/Claude/Projects/Ebay/ebay_dashboard.html">
+      <span class="ti">📦</span><span><b>eBay UK</b><span>open your dashboard</span></span></a>
+    <a class="tool-btn" href="file:///C:/Users/SOURA/Documents/Claude/Projects/Farming-%20West%20Bengal/Farm_Dashboard.html">
+      <span class="ti">🌾</span><span><b>Farm · West Bengal</b><span>India farming dashboard</span></span></a>
+    <a class="tool-btn" href="https://tickermover.com/app" target="_blank" rel="noopener">
+      <span class="ti">📈</span><span><b>TickerMover</b><span>open the app</span></span></a>
+  </div>
+
+  <!-- sync bar -->
+  <div class="syncbar">
+    <div id="sync-out">
+      <span class="lk">🔒 Sync across devices —</span>
+      <input id="sync-email" type="email" placeholder="email" autocomplete="username">
+      <input id="sync-pass" type="password" placeholder="password" autocomplete="current-password">
+      <button onclick="syncLogin()">Sign in</button>
+      <button class="ghost" onclick="syncSignup()">Create</button>
+      <span class="sync-msg" id="sync-msg"></span>
+    </div>
+    <div id="sync-in" style="display:none">
+      <span class="sync-dot"></span> Synced as <b id="sync-user"></b>
+      <button class="ghost" onclick="syncLogout()" style="margin-left:auto">Sign out</button>
+    </div>
+  </div>
+
+  <!-- tab navigation -->
+  <nav class="tabs" id="tabs">
+    <button data-tab="today" class="on">☀️ Today</button>
+    <button data-tab="weekend">🌸 Weekend</button>
+    <button data-tab="knowledge">📚 Knowledge</button>
+    <button data-tab="business">💼 Business</button>
+    <button data-tab="wealth">💰 Wealth</button>
+    <button data-tab="work">✅ Work List</button>
+    <button data-tab="reflect">🌙 Reflect</button>
+  </nav>
+
+  <div id="tab-today" class="tab-panel active">
+
+  <!-- principle of the day -->
+  <section>
+    <div class="sec-head"><span class="num">一</span><h2>Principle for Today</h2><span class="jp" id="prin-jp">今日の心</span></div>
+    <div class="principle">
+      <div><span class="word" id="prin-word">Ikigai</span><span class="kana" id="prin-kana">生き甲斐</span></div>
+      <div class="mean" id="prin-mean">a reason for being</div>
+      <p id="prin-desc">—</p>
+      <div class="today-do"><b>Practice today:</b> <span id="prin-do">—</span></div>
+    </div>
+  </section>
+
+  <!-- timeline -->
+  <section>
+    <div class="sec-head row"><span class="num">二</span><h2>Your Daily Rhythm</h2><span class="jp" id="rhythm-jp">一日の流れ</span>
+      <div class="toggle">
+        <button id="btn-wd" class="on" onclick="setMode('wd')">Weekday</button>
+        <button id="btn-we" onclick="setMode('we')">Weekend</button>
+      </div>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- daughter's day -->
+  <section>
+    <div class="sec-head"><span class="num">三</span><h2>Her Day · 18 months</h2><span class="jp">🌸 where your day meets hers</span></div>
+    <p class="her-intro">Her rhythm is the fixed point; yours flexes around it. You share <b>three windows</b>: the morning warm-start &amp; breakfast before work, and the whole evening from when you're home (~5:45) through bedtime. Highlighted rows are your <b>together</b> moments — be fully in them.</p>
+    <div class="her-grid" id="herday"></div>
+    <div class="her-legend">
+      <span><i class="swatch" style="background:#faecef;border:1px solid #ecd2d6"></i> together with you</span>
+      <span><i class="swatch" style="background:var(--paper);border:1px solid var(--line)"></i> her own / while you work</span>
+      <span><i class="swatch" style="background:#fff;border:2px solid #ca6c84"></i> happening now</span>
+    </div>
+    <div class="nature" style="margin-top:14px">
+      <div class="ic">🛁</div>
+      <p><b>Note:</b> her one daily bath is after <b>lunch (1:30pm)</b>, so the evening needs its own "day is ending" signal instead — keep the same order every night: <b>pyjamas → milk → 2 books → lullaby</b>. Predictability is what lets her settle.</p>
+    </div>
+  </section>
+
+  <!-- practices -->
+  <section>
+    <div class="sec-head"><span class="num">四</span><h2>Daily Practices · Kaizen 1%</h2><span class="jp">小さな習慣</span></div>
+    <div class="practices" id="practices"></div>
+    <div class="progress-wrap">
+      <div class="lab"><span>Today's practice</span><span id="prog-text">0 / 0</span></div>
+      <div class="bar"><i id="prog-bar"></i></div>
+    </div>
+    <div class="nature">
+      <div class="ic">🌲</div>
+      <p><b>Shinrin-yoku (forest bathing):</b> on a free afternoon, take the family to <b>Margam Country Park</b> or <b>Afan Forest Park</b> nearby. A slow, phone-free walk among trees is the single calmest habit you can build here in Port Talbot.</p>
+    </div>
+  </section>
+
+  </div><!-- /tab-today -->
+
+  <div id="tab-weekend" class="tab-panel">
+
+  <!-- weekend focus -->
+  <section>
+    <div class="sec-head"><span class="num">五</span><h2>Weekend Focus</h2><span class="jp">週末 · room to breathe & build</span></div>
+    <p class="her-intro">Weekends open up. Mornings are for the family and the body; her nap (≈2:00–3:30) is your <b>deep-work window</b> for the ventures. Markets are closed Sat/Sun, so that time is for <b>review and planning</b>, not trading.</p>
+    <div class="wk-grid">
+      <div class="wk k-move">
+        <h3>🏃 Exercise <span></span></h3>
+        <div class="wt">Sat &amp; Sun · 7:00–7:40</div>
+        <p>Proper session before she wakes — run, bodyweight, or yoga. Weekdays keep a short 15-min stretch at 7:10.</p>
+      </div>
+      <div class="wk k-garden">
+        <h3>🌱 Gardening</h3>
+        <div class="wt">Sat &amp; Sun · 9:30–10:30</div>
+        <p>She potters beside you (nature play counts as her "hands & senses"). Calm, grounding, outdoors together.</p>
+      </div>
+      <div class="wk k-out">
+        <h3>🌊 Outdoor outing</h3>
+        <div class="wt">Sat &amp; Sun · 10:45–12:30</div>
+        <p>Margam Park, Afan Forest, Aberavon seafront or the river. Fresh air before lunch helps her nap &amp; mood.</p>
+      </div>
+      <div class="wk k-india">
+        <h3>🌾 India business review</h3>
+        <div class="wt">Saturday · 2:00–2:45 (her nap)</div>
+        <p>Weekly review of the West Bengal farm &amp; India venture. Open the Farm dashboard, set next week's actions.</p>
+      </div>
+      <div class="wk k-money">
+        <h3>📈 Markets &amp; eBay review</h3>
+        <div class="wt">Saturday · 2:45–3:30 (her nap)</div>
+        <p>US market weekly review &amp; watchlist for the week, TickerMover check, eBay restock/relist planning.</p>
+      </div>
+      <div class="wk k-astro">
+        <h3>🔮 Astrology study</h3>
+        <div class="wt">Sunday · 2:00–3:30 (her nap)</div>
+        <p>Your quiet study block — uninterrupted, the house calm. The one weekend deep-focus session just for learning.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- monthly trip -->
+  <section>
+    <div class="sec-head"><span class="num">六</span><h2>Monthly Trip</h2><span class="jp">月の旅 · one proper outing a month</span></div>
+    <div class="trip">
+      <div class="tm">
+        <div class="mo" id="trip-mo">—</div>
+        <div class="pl" id="trip-pl">—</div>
+      </div>
+      <div class="td">
+        <h3 id="trip-h">—</h3>
+        <p id="trip-p">—</p>
+        <div class="note">Pick one Saturday this month, book it early, and treat it as non-negotiable family time. <span class="jp" style="color:var(--shu)">一期一会</span> — these days with her at this age won't come again.</div>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /tab-weekend -->
+
+  <div id="tab-business" class="tab-panel">
+
+  <!-- business windows -->
+  <section>
+    <div class="sec-head"><span class="num">七</span><h2>Business Windows</h2><span class="jp">仕事の窓 · glance, don't drown</span></div>
+    <p style="font-size:13.5px;color:var(--ink-soft);margin:-6px 0 14px;max-width:760px">
+      Each venture has a <b>time-box</b> so it never bleeds into family or rest. Open it, act, close it. <span class="jp" style="color:var(--shu)">一期一会</span> — be fully present in whatever window you're in.</p>
+    <div class="biz-grid">
+      <div class="biz s-tata">
+        <h3>Tata Steel · the anchor <span class="when">09:00–17:30</span></h3>
+        <p>Your steady ground. Protect it — it funds the calm. Leave it at the gate when you come home.</p>
+      </div>
+      <div class="biz s-india">
+        <h3>India Business <span class="live off" id="live-in">—</span></h3>
+        <p>India runs <b>05:00–13:30 your time</b> (9:30–18:00 IST). Best touchpoint: your <b>06:55 quiet hour</b> (≈11:25 IST there) or your lunch break. Wrap calls before 13:30 BST.</p>
+      </div>
+      <div class="biz s-us">
+        <h3>US Share Market <span class="live off" id="live-us">—</span></h3>
+        <p>NYSE opens <b>14:30 BST</b>, closes <b>21:00 BST</b>. Peek at the open during lunch; do real decisions in your <b>21:00–21:45</b> box after she's asleep — never near your own bedtime.</p>
+      </div>
+      <div class="biz s-ebay">
+        <h3>eBay UK <span class="when">lunch + 21:00 box</span></h3>
+        <p>Two quick checks: orders & messages at lunch, dispatch/relisting in the evening box. Batch it — don't graze all day.</p>
+      </div>
+      <div class="biz s-ticker">
+        <h3>Ticker Mover Site <span class="when">21:00 box</span></h3>
+        <p>Content, monitoring, updates during the 21:00–21:45 window. Let it run on autopilot the rest of the day.</p>
+      </div>
+      <div class="biz s-tata" style="border-left-color:var(--ai)">
+        <h3>One rule <span class="when">守</span></h3>
+        <p><b>Business only after she's asleep — one box, then stop by 21:45.</b> The phone sleeps outside the bedroom. Mornings (after puja) and the whole evening from 5:45 belong to your daughter and wife.</p>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /tab-business -->
+
+  <div id="tab-wealth" class="tab-panel">
+
+  <!-- wealth -->
+  <section>
+    <div class="sec-head"><span class="num">八</span><h2>Wealth · 資産</h2><span class="jp">money with calm &amp; intent</span></div>
+    <p class="her-intro">A calm overview of your assets. Enter rough values — in <b>one currency</b> (convert India holdings to £) — and the allocation updates live. Your numbers are saved <b>only on this device</b>. The order that builds calm: <b>1) emergency cash → 2) protect the family → 3) then grow.</b></p>
+    <div class="fin-summary">
+      <div class="total"><span>Investable assets (excludes protection cover)</span><b id="fin-total">£0</b></div>
+      <div class="alloc-bar" id="alloc-bar"></div>
+      <div class="alloc-legend" id="alloc-legend"></div>
+    </div>
+    <div class="fin-grid" id="fin-grid"></div>
+    <div class="fin-disclaimer">⚖️ This is general educational information to help you organise your own thinking — <b>not financial, tax, or investment advice</b>, and I'm not a financial adviser. Your holdings span India, the US and the UK, so cross-border tax (UK residency rules, the India–UK double-tax treaty, US dividend withholding) matters a great deal. Consider a qualified cross-border adviser before acting.</div>
+  </section>
+
+  </div><!-- /tab-wealth -->
+
+  <div id="tab-knowledge" class="tab-panel">
+
+  <!-- concepts to learn -->
+  <section>
+    <div class="sec-head"><span class="num">学</span><h2>Knowledge · Japanese Living</h2><span class="jp">学び · learn &amp; live it</span></div>
+    <p class="her-intro">A quiet library for the life you're building — the core ideas, the daily practices that bring them alive, the best books, and channels to watch with chai in the evening. No rush: take <b>one concept a week</b> and live it.</p>
+    <div class="wk-grid">
+      <div class="wk k-india"><h3>🌅 Ikigai <span class="wt" style="color:var(--ink-faint)">生き甲斐</span></h3><div class="wt">a reason to rise</div><p><b>Learn:</b> the overlap of what you love, what you're good at, what the world needs, and what sustains you.<br><b>Apply:</b> each morning, name one reason you're doing all this.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=ikigai+japanese+concept+for+a+happy+life" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-move"><h3>📈 Kaizen <span class="wt" style="color:var(--ink-faint)">改善</span></h3><div class="wt">1% better, daily</div><p><b>Learn:</b> tiny, continuous improvement compounds into mountains over time.<br><b>Apply:</b> improve one small thing by 1% today — just one.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=kaizen+continuous+improvement+1+percent" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-astro"><h3>🌸 Wabi-Sabi <span class="wt" style="color:var(--ink-faint)">侘寂</span></h3><div class="wt">beauty in imperfection</div><p><b>Learn:</b> nothing is perfect, permanent or finished — and that's where beauty lives.<br><b>Apply:</b> let one imperfect thing simply be today.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=wabi+sabi+japanese+philosophy" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-out"><h3>🤍 Ichigo Ichie <span class="wt" style="color:var(--ink-faint)">一期一会</span></h3><div class="wt">one time, one meeting</div><p><b>Learn:</b> every moment happens only once and never returns.<br><b>Apply:</b> at bedtime with your daughter, put everything else down.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=ichigo+ichie+meaning" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-garden"><h3>🌲 Shinrin-yoku <span class="wt" style="color:var(--ink-faint)">森林浴</span></h3><div class="wt">forest bathing</div><p><b>Learn:</b> slow, sensory time among trees measurably lowers stress.<br><b>Apply:</b> 10 phone-free minutes outdoors — Margam or Afan on weekends.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=shinrin+yoku+forest+bathing" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-garden"><h3>🍵 Hara Hachi Bu <span class="wt" style="color:var(--ink-faint)">腹八分目</span></h3><div class="wt">eat to 80%</div><p><b>Learn:</b> the Okinawan habit of stopping before full keeps body &amp; mind light.<br><b>Apply:</b> at one meal, pause when you're 80% full.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=hara+hachi+bu+okinawa+longevity" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-money"><h3>🌳 Oubaitori <span class="wt" style="color:var(--ink-faint)">桜梅桃李</span></h3><div class="wt">never compare</div><p><b>Learn:</b> cherry, plum, peach, apricot — each blossoms in its own time.<br><b>Apply:</b> catch one comparison today and let it go.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=oubaitori+japanese+concept" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-india"><h3>🏺 Kintsugi <span class="wt" style="color:var(--ink-faint)">金継ぎ</span></h3><div class="wt">golden repair</div><p><b>Learn:</b> broken pottery mended with gold — the break becomes part of its beauty.<br><b>Apply:</b> reframe one past setback as something that made you wiser.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=kintsugi+golden+repair+philosophy" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-astro"><h3>🍂 Mono no Aware <span class="wt" style="color:var(--ink-faint)">物の哀れ</span></h3><div class="wt">the poignancy of things</div><p><b>Learn:</b> a tender awareness that everything passes — gratitude sharpened by impermanence.<br><b>Apply:</b> notice your child growing, and be thankful for now.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=mono+no+aware+meaning" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-move"><h3>🪨 Gaman <span class="wt" style="color:var(--ink-faint)">我慢</span></h3><div class="wt">dignified perseverance</div><p><b>Learn:</b> enduring hard stretches with patience and grace — quiet strength, not gritted teeth.<br><b>Apply:</b> meet one frustration with a slow breath.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=gaman+japanese+perseverance" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-out"><h3>🧹 Danshari <span class="wt" style="color:var(--ink-faint)">断捨離</span></h3><div class="wt">declutter mind &amp; home</div><p><b>Learn:</b> refuse, dispose, separate — fewer things, fewer open loops, more space to breathe.<br><b>Apply:</b> remove one object or open task that no longer serves you.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=danshari+decluttering+japanese" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-money"><h3>🕊️ Yutori <span class="wt" style="color:var(--ink-faint)">ゆとり</span></h3><div class="wt">spaciousness, slack</div><p><b>Learn:</b> deliberate breathing room — arriving early, leaving gaps — is where calm grows.<br><b>Apply:</b> build one 15-minute empty gap into today.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=yutori+japanese+concept+slow+living" target="_blank" rel="noopener">▶ Watch</a></div>
+    </div>
+  </section>
+
+  <!-- practices to build -->
+  <section>
+    <div class="sec-head"><span class="num">行</span><h2>Practices to Build</h2><span class="jp">実践 · turn ideas into habits</span></div>
+    <div class="wk-grid">
+      <div class="wk k-garden"><h3>🍵 Morning tea ritual</h3><div class="wt">chadō · 茶道</div><p>Brew green tea or matcha slowly, sit for 2 quiet minutes, set the day's intention before anyone wakes.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=japanese+tea+ceremony+explained" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-garden"><h3>🌲 Forest bathing walk</h3><div class="wt">shinrin-yoku</div><p>On a free afternoon, walk slowly with senses open — no phone, no goal. Margam &amp; Afan are minutes away.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=how+to+do+shinrin+yoku+forest+bathing" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-india"><h3>📓 Ikigai journaling</h3><div class="wt">find your why</div><p>Answer four prompts: what you love, what you're good at, what the world needs, what sustains you. Revisit monthly.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=ikigai+exercise+find+your+purpose" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-move"><h3>📈 Kaizen 1% log</h3><div class="wt">tiny gains</div><p>Each evening, note one small thing you improved today. Watch the compounding over weeks.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=kaizen+small+habits+method" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-out"><h3>🧹 Declutter one area</h3><div class="wt">danshari · KonMari</div><p>One shelf, drawer or corner at a time. Keep only what's useful or sparks joy; thank and release the rest.</p><a class="kwatch" href="https://www.youtube.com/results?search_query=marie+kondo+konmari+method+tidying" target="_blank" rel="noopener">▶ Watch</a></div>
+      <div class="wk k-astro"><h3>🌙 Hansei reflection</h3><div class="wt">反省 · honest review</div><p>At day's end: what went well, one thing to improve tomorrow, one moment of gratitude. (Built into your Reflect tab.)</p><a class="kwatch" href="https://www.youtube.com/results?search_query=hansei+japanese+self+reflection" target="_blank" rel="noopener">▶ Watch</a></div>
+    </div>
+  </section>
+
+  <!-- books -->
+  <section>
+    <div class="sec-head"><span class="num">本</span><h2>Recommended Books</h2><span class="jp">本 · read slowly</span></div>
+    <div class="kbooks">
+      <a class="kbook" href="https://www.youtube.com/results?search_query=Ikigai+Hector+Garcia+book+summary" target="_blank" rel="noopener"><div class="bt">Ikigai: The Japanese Secret to a Long and Happy Life</div><div class="ba">Héctor García &amp; Francesc Miralles</div><div class="bd">The famous primer on purpose, longevity and the Okinawan way.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=The+Little+Book+of+Ikigai+Ken+Mogi+summary" target="_blank" rel="noopener"><div class="bt">The Little Book of Ikigai</div><div class="ba">Ken Mogi</div><div class="bd">A neuroscientist's grounded, everyday take on finding your why.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=Wabi+Sabi+Beth+Kempton+book+summary" target="_blank" rel="noopener"><div class="bt">Wabi Sabi: Wisdom for a Perfectly Imperfect Life</div><div class="ba">Beth Kempton</div><div class="bd">Live gracefully with imperfection, with simple rituals to try.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=The+Book+of+Ichigo+Ichie+summary" target="_blank" rel="noopener"><div class="bt">The Book of Ichigo Ichie</div><div class="ba">Héctor García &amp; Francesc Miralles</div><div class="bd">The art of treasuring each unrepeatable moment.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=Forest+Bathing+Qing+Li+book+summary" target="_blank" rel="noopener"><div class="bt">Forest Bathing</div><div class="ba">Dr. Qing Li</div><div class="bd">The science and practice of shinrin-yoku, adapted for city life.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=Zen+The+Art+of+Simple+Living+Shunmyo+Masuno+summary" target="_blank" rel="noopener"><div class="bt">Zen: The Art of Simple Living</div><div class="ba">Shunmyo Masuno</div><div class="bd">100 tiny daily Zen habits from a Buddhist priest &amp; garden designer.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=A+Monk%27s+Guide+to+a+Clean+House+and+Mind+summary" target="_blank" rel="noopener"><div class="bt">A Monk's Guide to a Clean House and Mind</div><div class="ba">Shoukei Matsumoto</div><div class="bd">Cleaning as a calming spiritual practice.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=The+Life-Changing+Magic+of+Tidying+Up+Marie+Kondo+summary" target="_blank" rel="noopener"><div class="bt">The Life-Changing Magic of Tidying Up</div><div class="ba">Marie Kondo</div><div class="bd">The KonMari method of joyful, lasting decluttering.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=Kaizen+Sarah+Harvey+book+summary" target="_blank" rel="noopener"><div class="bt">Kaizen</div><div class="ba">Sarah Harvey</div><div class="bd">Small steps to change your habits and your life, without burnout.</div><span class="bplay">▶ summary on YouTube</span></a>
+      <a class="kbook" href="https://www.youtube.com/results?search_query=Japonisme+Erin+Niimi+Longhurst+book+summary" target="_blank" rel="noopener"><div class="bt">Japonisme</div><div class="ba">Erin Niimi Longhurst</div><div class="bd">Ikigai, wabi-sabi, forest bathing &amp; more, beautifully introduced.</div><span class="bplay">▶ summary on YouTube</span></a>
+    </div>
+  </section>
+
+  <!-- youtube -->
+  <section>
+    <div class="sec-head"><span class="num">観</span><h2>Watch · YouTube</h2><span class="jp">動画 · channels &amp; picks</span></div>
+    <p class="her-intro">Channels worth subscribing to for an authentic feel of Japanese daily life and philosophy.</p>
+    <div class="tools">
+      <a class="tool-btn" href="https://www.youtube.com/@PaolofromTOKYO" target="_blank" rel="noopener"><span class="ti">🎥</span><span><b>Paolo fromTOKYO</b><span>"A Day in the Life of…" series</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/@AbroadinJapan" target="_blank" rel="noopener"><span class="ti">🗾</span><span><b>Abroad in Japan</b><span>Chris Broad · life &amp; culture</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/@LifeWhereImFrom" target="_blank" rel="noopener"><span class="ti">🏠</span><span><b>Life Where I'm From</b><span>everyday Japan, deep dives</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/@RachelandJun" target="_blank" rel="noopener"><span class="ti">💞</span><span><b>Rachel &amp; Jun</b><span>JP/US couple · culture &amp; food</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/@NHKWORLDJAPAN" target="_blank" rel="noopener"><span class="ti">📺</span><span><b>NHK WORLD-JAPAN</b><span>Japanology &amp; documentaries</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/@theschooloflifetv" target="_blank" rel="noopener"><span class="ti">🧠</span><span><b>The School of Life</b><span>wabi-sabi, Zen &amp; philosophy</span></span></a>
+    </div>
+    <div class="kvids">
+      <a class="tool-btn" href="https://www.youtube.com/results?search_query=Paolo+fromTOKYO+a+day+in+the+life+japan" target="_blank" rel="noopener"><span class="ti">▶</span><span><b>A Day in the Life (Japan)</b><span>real daily routines</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/results?search_query=ikigai+japanese+secret+to+a+happy+life" target="_blank" rel="noopener"><span class="ti">▶</span><span><b>Ikigai explained</b><span>purpose &amp; longevity</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/results?search_query=wabi+sabi+school+of+life" target="_blank" rel="noopener"><span class="ti">▶</span><span><b>Wabi-sabi</b><span>beauty in imperfection</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/results?search_query=shinrin+yoku+forest+bathing+documentary" target="_blank" rel="noopener"><span class="ti">▶</span><span><b>Forest bathing</b><span>nature &amp; calm</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/results?search_query=japanese+tea+ceremony+explained" target="_blank" rel="noopener"><span class="ti">▶</span><span><b>Tea ceremony</b><span>ritual &amp; presence</span></span></a>
+      <a class="tool-btn" href="https://www.youtube.com/results?search_query=zen+monk+daily+life+japan" target="_blank" rel="noopener"><span class="ti">▶</span><span><b>A Zen monk's day</b><span>simple living</span></span></a>
+    </div>
+  </section>
+
+  </div><!-- /tab-knowledge -->
+
+  <div id="tab-work" class="tab-panel">
+
+  <!-- pending work -->
+  <section>
+    <div class="sec-head"><span class="num">✓</span><h2>Pending Work</h2><span class="jp">やる事 · one calm list</span></div>
+    <p class="her-intro">One place for everything on your plate, across all the ventures. Add it, give it a home and a priority, and let it go from your head. Tackle high-priority items in their time-box — don't carry the whole list at once. <span class="jp" style="color:var(--shu)">断捨離</span> — clear what's done.</p>
+    <div class="todo-add">
+      <input id="todo-text" placeholder="Add a task…  (press Enter)">
+      <select id="todo-cat">
+        <option value="tata">Tata Steel</option>
+        <option value="india">India biz</option>
+        <option value="farm">Farm (WB)</option>
+        <option value="us">US market</option>
+        <option value="ebay">eBay</option>
+        <option value="ticker">TickerMover</option>
+        <option value="home">Home / Family</option>
+        <option value="astro">Astrology</option>
+        <option value="other">Other</option>
+      </select>
+      <select id="todo-pri">
+        <option value="2">High</option>
+        <option value="1" selected>Medium</option>
+        <option value="0">Low</option>
+      </select>
+      <button onclick="addTask()">Add</button>
+    </div>
+    <div class="todo-stats" id="todo-stats"></div>
+    <div id="todo-list"></div>
+  </section>
+
+  </div><!-- /tab-work -->
+
+  <div id="tab-reflect" class="tab-panel">
+
+  <!-- reflection -->
+  <section>
+    <div class="sec-head"><span class="num">九</span><h2>Evening Reflection · Hansei</h2><span class="jp">反省</span></div>
+    <div class="reflect">
+      <label>One thing that went well today (感謝 · gratitude)</label>
+      <input id="r-good" placeholder="A small good moment...">
+      <label>One 1% improvement for tomorrow (改善 · kaizen)</label>
+      <input id="r-better" placeholder="One tiny thing to adjust...">
+      <label>A moment I was fully present with family (一期一会)</label>
+      <textarea id="r-present" placeholder="When did I truly slow down today?"></textarea>
+      <div class="save-note" id="save-note">Saved automatically on this device.</div>
+    </div>
+  </section>
+
+  </div><!-- /tab-reflect -->
+
+  <footer>
+    <div class="haiku" id="haiku">—</div>
+    <div class="sig">生活 Seikatsu — your living. Built for a calm life · Port Talbot</div>
+  </footer>
+
+</div>
+
+<script>
+/* ---------------- data ---------------- */
+const PRINCIPLES = [
+  {word:"Ikigai", kana:"生き甲斐", mean:"a reason for being",
+   desc:"The quiet overlap of what you love, what you're good at, what the world needs, and what sustains you. Your family, your craft, your steady work — your ikigai is already here. Notice it.",
+   do:"Before the day starts, name the one reason you're doing all this. Hold it for 30 seconds."},
+  {word:"Kaizen", kana:"改善", mean:"continuous small improvement",
+   desc:"Not dramatic change — a 1% better, every day. Across a year, tiny consistent steps compound into something remarkable, in your routine, businesses, and calm.",
+   do:"Improve one small thing by 1% today. Just one. Let it be enough."},
+  {word:"Ichigo Ichie", kana:"一期一会", mean:"one time, one meeting",
+   desc:"Every moment happens only once. This bedtime with your little one, this cup of tea, this evening — none will return exactly. Treat each as a treasure.",
+   do:"In one moment with your child today, put everything else down completely."},
+  {word:"Wabi-Sabi", kana:"侘寂", mean:"beauty in imperfection",
+   desc:"Nothing is perfect, permanent, or finished — and that is where the beauty lives. A calm life isn't a flawless one; it's one at peace with the cracks.",
+   do:"Let one imperfect thing be, today. Don't fix it. Accept it."},
+  {word:"Hara Hachi Bu", kana:"腹八分目", mean:"eat to 80% full",
+   desc:"The Okinawan habit of stopping before fullness. It keeps the body light, the mind clear, and the afternoon free of heaviness.",
+   do:"At one meal today, stop when you're 80% full and pause."},
+  {word:"Shinrin-yoku", kana:"森林浴", mean:"forest bathing",
+   desc:"Simply being among trees, slowly, with the senses open. It lowers stress measurably. You're lucky — Margam and Afan forests are minutes away.",
+   do:"Step outside among greenery for 10 phone-free minutes."},
+  {word:"Mono no Aware", kana:"物の哀れ", mean:"the gentle sadness of things",
+   desc:"A tender awareness that everything passes — your child growing, seasons turning. It isn't grief; it's gratitude sharpened by impermanence.",
+   do:"Notice one thing that's quietly changing, and be thankful it exists now."},
+  {word:"Oubaitori", kana:"桜梅桃李", mean:"never compare yourself",
+   desc:"Cherry, plum, peach, apricot — each blossoms in its own time, in its own way. Your path with five ventures and a young family is yours alone.",
+   do:"Catch one comparison today and let it go. Run your own race."},
+  {word:"Gaman", kana:"我慢", mean:"dignified perseverance",
+   desc:"Enduring the hard, tiring stretches with patience and grace, without losing your calm or your kindness. Quiet strength, not gritted teeth.",
+   do:"Meet one frustration today with a slow breath instead of a reaction."},
+  {word:"Kintsugi", kana:"金継ぎ", mean:"golden repair",
+   desc:"Broken pottery mended with gold — the break becomes part of its beauty, not hidden but honoured. Your setbacks are seams of gold, not flaws.",
+   do:"Reframe one past mistake as something that made you wiser."},
+  {word:"Shikata ga nai", kana:"仕方がない", mean:"accept what can't be changed",
+   desc:"Some things — markets, delays, weather, a toddler's mood — are beyond control. Spend energy only where you have it; release the rest.",
+   do:"Identify one thing outside your control today and consciously let it go."},
+  {word:"Danshari", kana:"断捨離", mean:"declutter the mind & home",
+   desc:"Refuse, dispose, separate. Fewer things, fewer open loops, more space to breathe. A calm home makes a calm mind.",
+   do:"Remove one object or one open task that no longer serves you."},
+  {word:"Mottainai", kana:"勿体無い", mean:"waste nothing",
+   desc:"A reverence for resources, time, and food — using what you have fully and gratefully. It quiets the urge to always acquire more.",
+   do:"Use up or finish one thing today instead of buying or starting new."},
+  {word:"Yutori", kana:"ゆとり", mean:"spaciousness, slack",
+   desc:"Deliberate breathing room in your schedule — arriving early, leaving gaps. Yutori is the opposite of rushing, and the soil where calm grows.",
+   do:"Build a 15-minute gap into today with nothing planned in it."}
+];
+
+const HAIKU = [
+  "朝の茶 — morning tea;<br>the steam rises slowly,<br>so does the day.",
+  "Quiet house, child asleep —<br>the steel cools,<br>the heart warms.",
+  "Five rivers to mind,<br>yet the still pond reflects<br>only this moment.",
+  "古池や — old pond,<br>a frog leaps in:<br>the sound of water.",
+  "Winter plum blossoms<br>without hurry —<br>neither should you."
+];
+
+/* ---------------- timeline ---------------- */
+const BLOCKS_WD = [
+  {s:390,e:395,  t:"06:30",ttl:"Wake & water · 朝",cat:"calm",pill:"Quiet",d:"Sunlight, water, no phone. Rise before she wakes — the house is still yours."},
+  {s:395,e:410,  t:"06:35",ttl:"Bath · স্নান",cat:"calm",pill:"Calm",d:"Warm bath first — wash clean into the day, clear and unhurried."},
+  {s:410,e:425,  t:"06:50",ttl:"Puja · নিত্য পূজা",cat:"practice",pill:"Puja",d:"Your 15 minutes, after the bath. Light the lamp, sit, pray. The day's calmest anchor."},
+  {s:425,e:440,  t:"07:05",ttl:"Tea, stillness & India check",cat:"biz",pill:"Business",d:"Green tea, 2 min still, name today's intention. Quick India touchpoint (≈11:35 IST). Box it."},
+  {s:440,e:450,  t:"07:20",ttl:"Light movement · 体操",cat:"practice",pill:"Move",d:"10 min stretch / surya namaskar to wake the body. (Full workout is for the weekend.)"},
+  {s:450,e:465,  t:"07:30",ttl:"☀️ Her wake — together",cat:"daughter",pill:"With her",d:"Cuddle, curtains, name the weather — Bengali + one English word. Slow and unhurried."},
+  {s:465,e:495,  t:"07:45",ttl:"🍳 Breakfast cooking",cat:"cook",pill:"Cooking",d:"Cook together / share with your wife. Simple and warm — one cooks, one keeps her happy."},
+  {s:495,e:510,  t:"08:15",ttl:"Get ready",cat:"calm",pill:"Calm",d:"Dress & pack with yutori — a little time to spare so nothing rushes."},
+  {s:510,e:520,  t:"08:30",ttl:"🥣 Breakfast with her",cat:"daughter",pill:"With her",d:"Sit together. Let her self-feed and be messy. Your last moment before work."},
+  {s:520,e:540,  t:"08:40",ttl:"Mindful commute",cat:"calm",pill:"Calm",d:"Breathe on the way in. Leave home at home."},
+  {s:540,e:750,  t:"09:00",ttl:"Tata Steel — the anchor",cat:"work",pill:"Work",d:"Steady, focused work. This funds the calm. (She's in her movement & hands blocks.)"},
+  {s:750,e:780,  t:"12:30",ttl:"Lunch + walk + quick checks",cat:"practice",pill:"Practice",d:"Eat to 80%, walk 10 min, peek at eBay orders & the US pre-open — then close it."},
+  {s:780,e:1050, t:"13:00",ttl:"Tata Steel — afternoon",cat:"work",pill:"Work",d:"Finish the day's craft well. (Her bath at 1:30, nap ~2–3:30, then play.)"},
+  {s:1050,e:1065,t:"17:30",ttl:"Finish & head home",cat:"calm",pill:"Calm",d:"Shed the workday on the way. Arrive present, not drained — the best part is next."},
+  {s:1065,e:1110,t:"17:45",ttl:"📚 Home — together time",cat:"daughter",pill:"With her",d:"Books, songs, pretend play, face-to-face. The richest part of your day."},
+  {s:1110,e:1140,t:"18:30",ttl:"🕯️ Calm wind-down — you lead",cat:"daughter",pill:"With her",d:"Lower lights & energy. Quiet floor play, cuddles, a book."},
+  {s:1140,e:1185,t:"19:00",ttl:"🍲 Dinner cooking",cat:"cook",pill:"Cooking",d:"Cook together / share. She potters nearby or in the high chair. Keep it light."},
+  {s:1185,e:1230,t:"19:45",ttl:"🍽️ Family dinner",cat:"daughter",pill:"With her",d:"All together. Let her self-feed. Hara hachi bu for you. Ichigo ichie."},
+  {s:1230,e:1245,t:"20:30",ttl:"🌙 Bedtime wind-down",cat:"daughter",pill:"With her",d:"Pyjamas, dim lights, low voice — the 'day is ending' signal."},
+  {s:1245,e:1260,t:"20:45",ttl:"🛏️ Bedtime ritual — yours",cat:"daughter",pill:"With her",d:"Milk → 2 books → lullaby → bed. She is only this small once."},
+  {s:1260,e:1305,t:"21:00",ttl:"Business box — focused",cat:"biz",pill:"Business",d:"She's asleep. US close/after-hours, eBay dispatch, TickerMover. One window, then shut it."},
+  {s:1305,e:1335,t:"21:45",ttl:"Wind-down with wife",cat:"calm",pill:"Calm",d:"Tidy the kitchen, tea, talk, no screens. Let the system settle."},
+  {s:1335,e:1350,t:"22:15",ttl:"Hansei & reading",cat:"practice",pill:"Practice",d:"Reflect below, read a few pages, gratitude."},
+  {s:1350,e:1440,t:"22:30",ttl:"Sleep · 就寝",cat:"calm",pill:"Rest",d:"Phone outside the room. 8 hrs to 06:30. Rest is productivity."}
+];
+
+const BLOCKS_WE = [
+  {s:390,e:420,  t:"06:30",ttl:"Wake & exercise · 体操",cat:"practice",pill:"Move",d:"Quiet rise, then a proper 30–40 min session — run, bodyweight or yoga — before she wakes."},
+  {s:420,e:435,  t:"07:00",ttl:"Bath · স্নান",cat:"calm",pill:"Calm",d:"Warm bath after the workout."},
+  {s:435,e:450,  t:"07:15",ttl:"Puja · নিত্য পূজা",cat:"practice",pill:"Puja",d:"Unhurried on a free morning. Light the lamp, sit, pray."},
+  {s:450,e:465,  t:"07:30",ttl:"☀️ Her wake — together",cat:"daughter",pill:"With her",d:"No rush today. Long cuddle, slow start."},
+  {s:465,e:510,  t:"07:45",ttl:"🍳 Breakfast cooking together",cat:"cook",pill:"Cooking",d:"Relaxed breakfast with your wife. Let her 'help' — name foods in Bengali + English."},
+  {s:510,e:540,  t:"08:30",ttl:"🥣 Family breakfast",cat:"daughter",pill:"With her",d:"Slow weekend breakfast, all together."},
+  {s:540,e:570,  t:"09:00",ttl:"🤸 Movement WITH her",cat:"daughter",pill:"With her",d:"Join her big-movement block — garden games, dancing, ball. Burn the morning energy together."},
+  {s:570,e:630,  t:"09:30",ttl:"🌱 Gardening",cat:"practice",pill:"Garden",d:"Tend the garden; she potters beside you (counts as her nature/hands play). Grounding and calm."},
+  {s:630,e:750,  t:"10:30",ttl:"🌊 Outdoor outing",cat:"daughter",pill:"With her",d:"Margam, Afan Forest, Aberavon seafront or the river. Fresh air & light before lunch."},
+  {s:750,e:810,  t:"12:30",ttl:"🍽️ Lunch together",cat:"daughter",pill:"With her",d:"Family lunch; then her bath at 1:30 as usual."},
+  {s:810,e:840,  t:"13:30",ttl:"Her bath + settle",cat:"calm",pill:"Calm",d:"Help with her bath, then she goes down for her nap. Your deep-work window opens."},
+  {s:840,e:885,  t:"14:00",ttl:"🌾 India / 🔮 study — block A",cat:"biz",pill:"Deep work",d:"SAT → India business & West Bengal farm review.  SUN → astrology study. The house is quiet; protect this."},
+  {s:885,e:930,  t:"14:45",ttl:"📈 Markets / 🔮 study — block B",cat:"biz",pill:"Deep work",d:"SAT → US weekly market & eBay/TickerMover review.  SUN → continue astrology study."},
+  {s:930,e:960,  t:"15:30",ttl:"🤗 Her wake + tea",cat:"daughter",pill:"With her",d:"Close the laptop. Slow re-entry — milk/fruit, calm voice."},
+  {s:960,e:1020, t:"16:00",ttl:"⚽ Play & out again",cat:"daughter",pill:"With her",d:"Second movement — park, ball, messy play, or a short second outing."},
+  {s:1020,e:1110,t:"17:00",ttl:"📚 Together time",cat:"daughter",pill:"With her",d:"Books, songs, pretend tea-party. Face-to-face, slow."},
+  {s:1110,e:1185,t:"18:30",ttl:"🕯️ Wind-down + 🍲 dinner cooking",cat:"cook",pill:"Cooking",d:"Lower the energy; cook dinner together while she winds down."},
+  {s:1185,e:1230,t:"19:45",ttl:"🍽️ Family dinner",cat:"daughter",pill:"With her",d:"All together. Let her self-feed."},
+  {s:1230,e:1260,t:"20:30",ttl:"🛏️ Bedtime ritual",cat:"daughter",pill:"With her",d:"Pyjamas → milk → 2 books → lullaby → bed."},
+  {s:1260,e:1320,t:"21:00",ttl:"Evening with wife",cat:"calm",pill:"Calm",d:"Light eBay/ticker only if needed, then relax together. No markets — they're closed."},
+  {s:1320,e:1350,t:"22:00",ttl:"Hansei & reading",cat:"practice",pill:"Practice",d:"Reflect on the week, read, gratitude."},
+  {s:1350,e:1440,t:"22:30",ttl:"Sleep · 就寝",cat:"calm",pill:"Rest",d:"Rest well. Next week's calm starts with tonight's sleep."}
+];
+
+let MODE='wd';
+function currentDayType(){return ['Sat','Sun'].includes(weekdayInTZ('Europe/London'))?'we':'wd';}
+function setMode(m){
+  MODE=m;
+  document.getElementById('btn-wd').className=m==='wd'?'on':'';
+  document.getElementById('btn-we').className=m==='we'?'on':'';
+  document.getElementById('rhythm-jp').textContent=m==='we'?'週末 · weekend':'一日の流れ · weekday';
+  renderTimeline();
+}
+
+const TRIPS=[
+  {pl:"Cardiff",      h:"National Museum & Bute Park",   p:"Cosy indoor January day — dinosaurs and art for her, a warm café for you, then a stroll in Bute Park if it's dry."},
+  {pl:"Brecon Beacons",h:"Waterfall country & a warm pub",p:"Wrap up warm for the Four Waterfalls area (or an easy stretch with the pram), then a long lunch by a fire."},
+  {pl:"Gower",       h:"Rhossili Bay & Worms Head",     p:"Big skies and the famous beach. Early spring walk along the clifftop, hot chocolate at the village."},
+  {pl:"Margam Park", h:"Bluebells & the deer",          p:"Right on your doorstep at its best — bluebells, the deer herd, playground and the castle grounds."},
+  {pl:"Tenby",       h:"Harbour & the old town",        p:"Pretty Pembrokeshire harbour town — pastel houses, gentle beach, ice cream. Easy with a toddler."},
+  {pl:"Three Cliffs",h:"Three Cliffs Bay, Gower",       p:"One of Wales's most beautiful beaches. Go at low tide, build sandcastles, picnic on the dunes."},
+  {pl:"Pembrokeshire",h:"Barafundle & Stackpole",       p:"Golden sand and clear water. A proper day at the coast — pack the picnic and the pram carrier."},
+  {pl:"Mumbles",     h:"Swansea Bay & the pier",        p:"Promenade walk, the lighthouse, Verdi's ice cream. Flat and easy, lovely on a warm August day."},
+  {pl:"Pen y Fan",   h:"Brecon Beacons foothills",      p:"Crisp September air. Do a gentle lower trail with the carrier, or the reservoir loop near the summit base."},
+  {pl:"Afan Forest", h:"Autumn colour & the falls",     p:"Local, glorious in autumn — woodland trails, the visitor centre café, leaf-kicking with your daughter."},
+  {pl:"Cardiff Bay", h:"Waterfront & indoor play",      p:"November-proof: the barrage walk, Techniquest for her, lunch by the water. Indoors if the rain sets in."},
+  {pl:"Folly Farm",  h:"Animals & Christmas lights",    p:"Pembrokeshire farm & zoo — perfect for an 18-month-old, with festive lights to end the year warmly."}
+];
+function renderTrip(){
+  const d=new Date();const m=d.getMonth();const t=TRIPS[m];
+  document.getElementById('trip-mo').textContent=new Intl.DateTimeFormat('en-GB',{month:'long'}).format(d);
+  document.getElementById('trip-pl').textContent=t.pl;
+  document.getElementById('trip-h').textContent=t.h;
+  document.getElementById('trip-p').textContent=t.p;
+}
+
+const PILLCLASS={calm:"p-calm",family:"p-family",work:"p-work",biz:"p-biz",practice:"p-practice",daughter:"p-daughter",cook:"p-cook"};
+
+/* her day — fixed point your day flexes around. share=true => you're with her */
+const DAUGHTER = [
+  {s:450, t:"07:30",main:"Wake & warm start",sub:"cuddle, curtains, name the weather",emoji:"☀️",share:true},
+  {s:510, t:"08:30",main:"Breakfast",sub:"self-feeds, messy = learning",emoji:"🥣",share:true},
+  {s:540, t:"09:00",main:"Big movement block",sub:"obstacle course, dancing, garden",emoji:"🤸",share:false},
+  {s:600, t:"10:00",main:"Snack + water",sub:"small, calm, sitting",emoji:"🍎",share:false},
+  {s:615, t:"10:15",main:"Hands & senses",sub:"fine-motor / nature card",emoji:"✋",share:false},
+  {s:675, t:"11:15",main:"Out & about",sub:"pram to river/seafront or garden",emoji:"🌳",share:false},
+  {s:780, t:"13:00",main:"Lunch — main meal",sub:"Bengali + Western, self-feed",emoji:"🍽️",share:false},
+  {s:810, t:"13:30",main:"Bath — wash & wind down",sub:"her one daily bath",emoji:"🛁",share:false},
+  {s:840, t:"14:00",main:"Nap",sub:"~1.5 hrs, dim & quiet",emoji:"😴",share:false},
+  {s:930, t:"15:30",main:"Wake & cuddle + snack",sub:"slow re-entry, calm voice",emoji:"🤗",share:false},
+  {s:960, t:"16:00",main:"Second movement & play",sub:"music, ball games, messy play",emoji:"⚽",share:false},
+  {s:1020,t:"17:00",main:"Language & together time",sub:"books, songs, face-to-face",emoji:"📚",share:true},
+  {s:1110,t:"18:30",main:"Calm wind-down",sub:"quiet floor play, cuddles",emoji:"🕯️",share:true},
+  {s:1185,t:"19:45",main:"Dinner",sub:"lighter family food",emoji:"🍲",share:true},
+  {s:1230,t:"20:30",main:"Bedtime wind-down",sub:"pyjamas, dim, low voice",emoji:"🌙",share:true},
+  {s:1245,t:"20:45",main:"Bedtime routine",sub:"milk, 2 books, lullaby",emoji:"🛏️",share:true},
+  {s:1260,t:"21:00",main:"Asleep",sub:"lights out",emoji:"💤",share:false}
+];
+
+/* ---------------- practices ---------------- */
+const HABITS = [
+  {id:"puja",  name:"Morning puja (15 min)",   jp:"পূজা", why:"Your spiritual anchor before the day"},
+  {id:"tea",   name:"Morning tea & stillness", jp:"お茶", why:"2 quiet minutes to start grounded"},
+  {id:"kaizen",name:"One 1% improvement",      jp:"改善", why:"Tiny progress, compounded"},
+  {id:"move",  name:"Move / walk 10+ min",     jp:"散歩", why:"Body calm, mind clear"},
+  {id:"hara",  name:"Eat to 80% (hara hachi bu)",jp:"腹八分",why:"Light body, sharp afternoon"},
+  {id:"present",name:"Phone-free family time", jp:"一期一会",why:"Be fully here with them"},
+  {id:"nature",name:"A few minutes outdoors",  jp:"森林浴", why:"Nature lowers stress"},
+  {id:"box",   name:"Business kept in its box",jp:"時間箱", why:"Work didn't bleed into rest"},
+  {id:"hansei",name:"Evening reflection",      jp:"反省", why:"Close the day with intention"}
+];
+
+/* ---------------- helpers ---------------- */
+function todayKey(){const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function load(k,def){try{const v=localStorage.getItem(k);return v===null?def:JSON.parse(v);}catch(e){return def;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}
+  if(typeof SYNC_KEYS!=='undefined'&&SYNC_KEYS.indexOf(k)>=0){try{pushKey(k);}catch(e){}}}
+
+function minutesInTZ(tz){
+  const f=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false});
+  const p=f.formatToParts(new Date());let h=0,m=0;
+  p.forEach(x=>{if(x.type==='hour')h=+x.value;if(x.type==='minute')m=+x.value;});
+  return h*60+m;
+}
+function clockStr(tz){
+  return new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+}
+function weekdayInTZ(tz){
+  return new Intl.DateTimeFormat('en-US',{timeZone:tz,weekday:'short'}).format(new Date());
+}
+
+/* season (Japanese sense of shun) */
+function seasonInfo(){
+  const m=new Date().getMonth()+1, d=new Date().getDate();
+  const list=[
+    {mm:[3,4,5],   jp:"春 Haru — Spring", note:"cherry blossom & fresh starts"},
+    {mm:[6,7,8],   jp:"夏 Natsu — Summer",note:"long light, green mountains, cool water"},
+    {mm:[9,10,11], jp:"秋 Aki — Autumn", note:"momiji leaves & quiet harvest"},
+    {mm:[12,1,2],  jp:"冬 Fuyu — Winter",note:"stillness, warm tea, early nights"}
+  ];
+  return list.find(s=>s.mm.includes(m));
+}
+
+/* ---------------- render ---------------- */
+function renderHeader(){
+  const ukMin=minutesInTZ('Europe/London');
+  let g="Good evening";
+  if(ukMin<360)g="Rest well";
+  else if(ukMin<720)g="Good morning";
+  else if(ukMin<1020)g="Good afternoon";
+  document.getElementById('greet').textContent=g;
+  document.getElementById('dateline').textContent=
+    new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
+  const s=seasonInfo();
+  document.getElementById('season').innerHTML="Now: <b>"+s.jp+"</b> · "+s.note;
+}
+
+function renderClocks(){
+  document.getElementById('t-uk').textContent=clockStr('Europe/London');
+  document.getElementById('t-in').textContent=clockStr('Asia/Kolkata');
+  document.getElementById('t-us').textContent=clockStr('America/New_York');
+
+  const uk=minutesInTZ('Europe/London');
+  document.getElementById('tag-uk').textContent =
+    uk>=540&&uk<1050 ? "Work hours" :
+    (uk>=1065&&uk<1260 ? "Family time" :
+    ((uk>=450&&uk<525) ? "With your daughter" :
+    (uk<375?"Sleep":"Personal time")));
+
+  // India business 9:30-18:00 IST
+  const inM=minutesInTZ('Asia/Kolkata'); const inWd=weekdayInTZ('Asia/Kolkata');
+  const inWeekday=!['Sat','Sun'].includes(inWd);
+  const inOpen=inWeekday&&inM>=570&&inM<1080;
+  const inTag=document.getElementById('tag-in');
+  inTag.textContent=inOpen?"● Business hours":"Off hours";
+  inTag.className="tag "+(inOpen?"open":"closed");
+  setLive('live-in',inOpen,"Open now","Closed");
+
+  // NYSE 9:30-16:00 ET, weekdays
+  const usM=minutesInTZ('America/New_York'); const usWd=weekdayInTZ('America/New_York');
+  const usWeekday=!['Sat','Sun'].includes(usWd);
+  const usOpen=usWeekday&&usM>=570&&usM<960;
+  const usPre=usWeekday&&usM>=240&&usM<570;
+  const usTag=document.getElementById('tag-us');
+  usTag.textContent=usOpen?"● Market open":(usPre?"Pre-market":"Closed");
+  usTag.className="tag "+(usOpen?"open":"closed");
+  setLive('live-us',usOpen,"Open now",usPre?"Pre-market":"Closed");
+}
+function setLive(id,on,onTxt,offTxt){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=on?onTxt:offTxt;el.className="live "+(on?"on":"off");
+}
+
+function renderPrinciple(){
+  // deterministic per-day so it feels intentional, not random
+  const d=new Date();
+  const dayNum=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()))/86400000);
+  const p=PRINCIPLES[dayNum%PRINCIPLES.length];
+  document.getElementById('prin-word').textContent=p.word;
+  document.getElementById('prin-kana').textContent=p.kana;
+  document.getElementById('prin-mean').textContent=p.mean;
+  document.getElementById('prin-desc').textContent=p.desc;
+  document.getElementById('prin-do').textContent=p.do;
+  document.getElementById('haiku').innerHTML=HAIKU[dayNum%HAIKU.length];
+}
+
+function renderTimeline(){
+  const tl=document.getElementById('timeline');tl.innerHTML="";
+  const set=MODE==='we'?BLOCKS_WE:BLOCKS_WD;
+  const uk=minutesInTZ('Europe/London');
+  const showNow=(MODE===currentDayType());
+  set.forEach(b=>{
+    const now=showNow&&uk>=b.s&&uk<b.e;
+    const div=document.createElement('div');
+    div.className="block"+(now?" now":"");
+    div.innerHTML=`
+      <div class="t">${b.t}</div>
+      <div class="rail"><div class="dot"></div></div>
+      <div class="card">
+        <div class="ttl">${b.ttl}
+          <span class="pill ${PILLCLASS[b.cat]}">${b.pill}</span>
+          ${now?'<span class="nowtag">now</span>':''}
+        </div>
+        <div class="desc">${b.d}</div>
+      </div>`;
+    tl.appendChild(div);
+  });
+  const nowEl=tl.querySelector('.block.now');
+}
+
+function renderHerDay(){
+  const wrap=document.getElementById('herday');if(!wrap)return;wrap.innerHTML="";
+  const uk=minutesInTZ('Europe/London');
+  DAUGHTER.forEach((b,i)=>{
+    const end=(i<DAUGHTER.length-1)?DAUGHTER[i+1].s:1440;
+    const now=uk>=b.s&&uk<end;
+    const el=document.createElement('div');
+    el.className="drow"+(b.share?" share":"")+(now?" dnow":"");
+    el.innerHTML=`<div class="dt">${b.t}</div>
+      <div><div class="dmain">${b.emoji} ${b.main}</div><div class="dsub">${b.sub}</div></div>`;
+    wrap.appendChild(el);
+  });
+}
+
+function renderPractices(){
+  const wrap=document.getElementById('practices');wrap.innerHTML="";
+  const key="seikatsu-habits-"+todayKey();
+  let state=load(key,{});
+  HABITS.forEach(h=>{
+    const done=!!state[h.id];
+    const el=document.createElement('div');
+    el.className="habit"+(done?" done":"");
+    el.innerHTML=`<div class="box">${done?'✓':''}</div>
+      <div><div class="name">${h.name} <span class="jp">· ${h.jp}</span></div>
+      <div class="why">${h.why}</div></div>`;
+    el.onclick=()=>{
+      state=load(key,{});state[h.id]=!state[h.id];save(key,state);
+      renderPractices();
+    };
+    wrap.appendChild(el);
+  });
+  const done=HABITS.filter(h=>state[h.id]).length;
+  document.getElementById('prog-text').textContent=done+" / "+HABITS.length;
+  document.getElementById('prog-bar').style.width=(done/HABITS.length*100)+"%";
+}
+
+function setupReflection(){
+  const key="seikatsu-reflect-"+todayKey();
+  const data=load(key,{});
+  ['r-good','r-better','r-present'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.value=data[id]||"";
+    el.addEventListener('input',()=>{
+      const d=load(key,{});d[id]=el.value;save(key,d);
+      const n=document.getElementById('save-note');
+      n.textContent="Saved · "+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    });
+  });
+}
+
+/* ---------------- wealth ---------------- */
+const BUCKETS={
+  safety:{name:"Safety",color:"#34597a"},
+  income:{name:"Income",color:"#7c8a52"},
+  growth:{name:"Growth",color:"#b8472b"},
+  protect:{name:"Protection",color:"#7a5ba0"}
+};
+const INVEST=["safety","income","growth"];
+const FIN=[
+  {id:"cash",name:"Liquid cash",bucket:"safety",role:"Emergency fund & near-term spending",
+   guide:"Your buffer. A common rule of thumb is 3–6 months of essential expenses kept instantly accessible; as the main earner with a young child, many people lean to the higher end. It earns little — its job is safety and access, not growth.",
+   cad:"Top up monthly"},
+  {id:"fd",name:"Fixed Deposit (FD)",bucket:"safety",role:"Capital-protected fixed return",
+   guide:"Money locked for a set term at a fixed rate — capital protected, return predictable. Good for money needed on a known date. In India, FD interest is taxable (TDS may apply) and breaking early usually forfeits interest.",
+   cad:"Review at maturity"},
+  {id:"ppf",name:"PPF",bucket:"safety",role:"Long-term, tax-free in India, govt-backed",
+   guide:"A 15-year Indian government scheme: interest is tax-free in India and capital is sovereign-backed — very safe, very illiquid. A solid long-term retirement anchor. Note: your residency status affects opening new vs. continuing existing accounts — worth checking.",
+   cad:"Contribute yearly"},
+  {id:"bond",name:"Bonds",bucket:"income",role:"Stability & income ballast",
+   guide:"You lend to a government or company for regular interest and your capital back at maturity. Generally steadier than shares, so they cushion the portfolio's swings. Prices move opposite to interest rates. They balance your growth assets.",
+   cad:"Review quarterly"},
+  {id:"mf",name:"Mutual Funds",bucket:"growth",role:"Diversified core growth",
+   guide:"Pooled, managed baskets — one purchase spreads risk across many holdings, and regular SIPs smooth out timing. Watch the expense ratio and whether each is equity / debt / hybrid. Usually the core engine of long-term growth.",
+   cad:"SIP monthly · review quarterly"},
+  {id:"in_stock",name:"India stocks",bucket:"growth",role:"Direct equity — higher risk",
+   guide:"Individual shares: higher potential return, higher volatility, and concentration risk if held in a few names. Needs research and a steady temperament. Often best as a satellite around a diversified core, not the whole portfolio.",
+   cad:"Review monthly (Sat block)"},
+  {id:"us_stock",name:"US stocks",bucket:"growth",role:"Global & USD diversification",
+   guide:"Exposure to the world's largest market and to the US dollar, diversifying away from rupee and sterling. Currency moves add both opportunity and risk. As a UK resident, check how US dividends (withholding) and gains are taxed and reported here.",
+   cad:"Review monthly (Sat block)"},
+  {id:"lic",name:"LIC policy",bucket:"protect",role:"Insurance-linked savings (India)",
+   guide:"Traditional endowment policies bundle modest life cover with low, stable returns. Check the policy's actual return and surrender terms — many find pure term cover plus separate investing more efficient, though existing policies often carry surrender trade-offs. Enter its current/surrender value.",
+   cad:"Review yearly"},
+  {id:"ins",name:"Insurance (term & health)",bucket:"protect",role:"Protection — not an investment",
+   guide:"The foundation for a sole earner with dependents. Term life replaces your income if the worst happens; health / critical-illness / income protection guard against medical and earnings shocks. Keep protection separate from investing — cover the family first, then grow. Enter your total cover.",
+   cad:"Review yearly & on life changes"}
+];
+function fmtMoney(n){return "£"+Math.round(n).toLocaleString('en-GB');}
+function buildFinance(){
+  const grid=document.getElementById('fin-grid');if(!grid)return;grid.innerHTML="";
+  const key="seikatsu-fin";const vals=load(key,{});
+  FIN.forEach(a=>{
+    const b=BUCKETS[a.bucket];const isInv=INVEST.includes(a.bucket);
+    const card=document.createElement('div');
+    card.className="fcard";card.style.borderLeftColor=b.color;
+    card.innerHTML=
+      '<div class="fh"><span class="fn">'+a.name+'</span><span class="btag" style="background:'+b.color+'">'+b.name+'</span></div>'+
+      '<div class="role">'+a.role+'</div>'+
+      '<div class="ginp"><label>'+(isInv?'Value £':'Cover £')+'</label>'+
+      '<input type="number" inputmode="numeric" data-id="'+a.id+'" value="'+(vals[a.id]||"")+'" placeholder="0">'+
+      '<span class="pct" id="pct-'+a.id+'"></span></div>'+
+      '<div class="guide">'+a.guide+'</div>'+
+      '<div class="cad">⟳ '+a.cad+'</div>';
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',()=>{const d=load(key,{});d[inp.dataset.id]=inp.value;save(key,d);updateFinance();});
+  });
+  updateFinance();
+}
+function updateFinance(){
+  const vals=load("seikatsu-fin",{});
+  let total=0;const byB={safety:0,income:0,growth:0};
+  FIN.forEach(a=>{if(INVEST.includes(a.bucket)){const x=+vals[a.id]||0;byB[a.bucket]+=x;total+=x;}});
+  const tEl=document.getElementById('fin-total');if(tEl)tEl.textContent=fmtMoney(total);
+  const bar=document.getElementById('alloc-bar');const leg=document.getElementById('alloc-legend');
+  if(bar)bar.innerHTML="";if(leg)leg.innerHTML="";
+  INVEST.forEach(bk=>{
+    const b=BUCKETS[bk];const pc=total>0?(byB[bk]/total*100):0;
+    if(bar&&pc>0){const i=document.createElement('i');i.style.width=pc+"%";i.style.background=b.color;bar.appendChild(i);}
+    if(leg){const s=document.createElement('span');s.innerHTML='<i class="swatch" style="background:'+b.color+'"></i> '+b.name+' · '+fmtMoney(byB[bk])+' ('+(total>0?pc.toFixed(0):0)+'%)';leg.appendChild(s);}
+  });
+  FIN.forEach(a=>{const el=document.getElementById('pct-'+a.id);if(el){const x=+vals[a.id]||0;el.textContent=(INVEST.includes(a.bucket)&&total>0&&x>0)?((x/total*100).toFixed(0)+"%"):"";}});
+}
+
+/* ---------------- tabs ---------------- */
+function showTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===name));
+  try{localStorage.setItem('seikatsu-tab',name);}catch(e){}
+}
+function wireTabs(){
+  document.querySelectorAll('#tabs button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      showTab(b.dataset.tab);
+      var nav=document.getElementById('tabs');
+      if(nav){var y=nav.getBoundingClientRect().top+window.pageYOffset-6;window.scrollTo({top:y,behavior:'smooth'});}
+    });
+  });
+  let start='today';try{start=localStorage.getItem('seikatsu-tab')||'today';}catch(e){}
+  showTab(start);
+}
+
+/* ---------------- work list ---------------- */
+const CATS={
+  tata:{name:"Tata Steel",color:"#5f574b"},
+  india:{name:"India biz",color:"#c1502e"},
+  farm:{name:"Farm (WB)",color:"#7c8a52"},
+  us:{name:"US market",color:"#34597a"},
+  ebay:{name:"eBay",color:"#b08d4f"},
+  ticker:{name:"TickerMover",color:"#7a5ba0"},
+  home:{name:"Home / Family",color:"#ca6c84"},
+  astro:{name:"Astrology",color:"#9a6b9a"},
+  other:{name:"Other",color:"#8c8273"}
+};
+const PRI=["Low","Medium","High"];
+function loadTasks(){return load('seikatsu-tasks',[]);}
+function saveTasks(t){save('seikatsu-tasks',t);}
+function addTask(){
+  const inp=document.getElementById('todo-text');const txt=inp.value.trim();if(!txt)return;
+  const tasks=loadTasks();
+  tasks.push({id:Date.now(),text:txt,cat:document.getElementById('todo-cat').value,pri:+document.getElementById('todo-pri').value,done:false});
+  saveTasks(tasks);inp.value="";renderTasks();inp.focus();
+}
+function toggleTask(id){const t=loadTasks();const x=t.find(a=>a.id===id);if(x)x.done=!x.done;saveTasks(t);renderTasks();}
+function delTask(id){saveTasks(loadTasks().filter(a=>a.id!==id));renderTasks();}
+function taskRow(t){
+  const c=CATS[t.cat]||CATS.other;
+  return '<div class="todo-item'+(t.done?' done':'')+'">'+
+    '<div class="tbox" onclick="toggleTask('+t.id+')">'+(t.done?'✓':'')+'</div>'+
+    '<div class="tmid"><div class="ttext">'+escapeHtml(t.text)+'</div>'+
+    '<div class="tmeta"><span class="tcat" style="background:'+c.color+'">'+c.name+'</span>'+
+    '<span class="tpri p'+t.pri+'">'+PRI[t.pri]+'</span></div></div>'+
+    '<button class="tdel" onclick="delTask('+t.id+')" title="Delete">×</button></div>';
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function renderTasks(){
+  const list=document.getElementById('todo-list');if(!list)return;
+  const tasks=loadTasks();
+  const pending=tasks.filter(t=>!t.done).sort((a,b)=>b.pri-a.pri||a.id-b.id);
+  const done=tasks.filter(t=>t.done).sort((a,b)=>b.id-a.id);
+  let html="";
+  if(pending.length===0&&done.length===0){
+    html='<div class="todo-empty">Nothing pending. A calm, empty list. 🍵</div>';
+  }else{
+    html+=pending.length?pending.map(taskRow).join(''):'<div class="todo-empty">No pending tasks — all clear.</div>';
+    if(done.length){html+='<div class="todo-sub">Done ('+done.length+')</div>'+done.map(taskRow).join('');}
+  }
+  list.innerHTML=html;
+  const stats=document.getElementById('todo-stats');
+  if(stats)stats.textContent=pending.length+" pending · "+done.length+" done";
+}
+
+/* ---------------- cross-device sync (Firebase) ---------------- */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyBdIp334PAPLWKuyy1ZNPNeTT804_gsBw8",
+  authDomain:"my-life-dashboard-dcac4.firebaseapp.com",
+  databaseURL:"https://my-life-dashboard-dcac4-default-rtdb.firebaseio.com",
+  projectId:"my-life-dashboard-dcac4",
+  storageBucket:"my-life-dashboard-dcac4.firebasestorage.app",
+  messagingSenderId:"582539889192",
+  appId:"1:582539889192:web:7f69de244ee3e12fa2431d"
+};
+const SYNC_KEYS=["seikatsu-fin","seikatsu-tasks"];
+function keyDefault(k){return k==="seikatsu-tasks"?[]:{};}
+let _db=null,_uid=null,_ref=null,_applying=false;
+function initSync(){
+  if(typeof firebase==='undefined'){console.warn('Firebase SDK not loaded');return;}
+  try{firebase.initializeApp(FIREBASE_CONFIG);}catch(e){}
+  _db=firebase.database();
+  firebase.auth().onAuthStateChanged(function(u){
+    if(u){_uid=u.uid;onSignedIn(u);}else{_uid=null;onSignedOut();}
+  });
+}
+function onSignedIn(u){
+  var o=document.getElementById('sync-out'),i=document.getElementById('sync-in');
+  if(o)o.style.display='none'; if(i)i.style.display='flex';
+  var ue=document.getElementById('sync-user'); if(ue)ue.textContent=u.email||'you';
+  msg('');
+  _ref=_db.ref('users/'+_uid+'/synced');
+  _ref.once('value').then(function(snap){
+    if(snap.exists()){applyRemote(snap.val());}else{pushAll();}
+    _ref.on('value',function(s){if(s.exists())applyRemote(s.val());});
+  }).catch(function(e){msg(e.message);});
+}
+function onSignedOut(){
+  var o=document.getElementById('sync-out'),i=document.getElementById('sync-in');
+  if(i)i.style.display='none'; if(o)o.style.display='flex';
+  if(_ref){_ref.off();_ref=null;}
+}
+function applyRemote(val){
+  _applying=true;
+  SYNC_KEYS.forEach(function(k){
+    var p=k.replace('seikatsu-','');
+    if(val&&val[p]!==undefined){try{localStorage.setItem(k,JSON.stringify(val[p]));}catch(e){}}
+  });
+  _applying=false;
+  try{buildFinance();}catch(e){} try{renderTasks();}catch(e){}
+}
+function pushAll(){
+  if(!_ref)return;var out={};
+  SYNC_KEYS.forEach(function(k){out[k.replace('seikatsu-','')]=load(k,keyDefault(k));});
+  _ref.set(out);
+}
+function pushKey(k){
+  if(!_ref||_applying)return;
+  _ref.child(k.replace('seikatsu-','')).set(load(k,keyDefault(k)));
+}
+function _v(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+function msg(m){var el=document.getElementById('sync-msg');if(el)el.textContent=m||'';}
+function syncLogin(){
+  if(typeof firebase==='undefined'){msg('Sync unavailable.');return;}
+  firebase.auth().signInWithEmailAndPassword(_v('sync-email'),_v('sync-pass'))
+    .then(function(){msg('');}).catch(function(e){msg(e.message);});
+}
+function syncSignup(){
+  if(typeof firebase==='undefined'){msg('Sync unavailable.');return;}
+  firebase.auth().createUserWithEmailAndPassword(_v('sync-email'),_v('sync-pass'))
+    .then(function(){msg('Account created — synced.');}).catch(function(e){msg(e.message);});
+}
+function syncLogout(){if(typeof firebase!=='undefined')firebase.auth().signOut();}
+
+/* ---------------- boot ---------------- */
+function tick(){renderHeader();renderClocks();renderTimeline();renderHerDay();}
+MODE=currentDayType();
+setMode(MODE);
+renderPrinciple();renderPractices();renderTrip();buildFinance();setupReflection();
+wireTabs();renderTasks();initSync();
+(function(){var t=document.getElementById('todo-text');if(t)t.addEventListener('keydown',function(e){if(e.key==='Enter')addTask();});})();
+(function(){var p=document.getElementById('sync-pass');if(p)p.addEventListener('keydown',function(e){if(e.key==='Enter')syncLogin();});})();
+tick();
+setInterval(tick,30000);
+</script>
+</body>
+</html>
